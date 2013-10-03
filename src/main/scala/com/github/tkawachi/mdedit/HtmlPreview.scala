@@ -3,6 +3,9 @@ package com.github.tkawachi.mdedit
 import javax.swing.JEditorPane
 import org.pegdown.PegDownProcessor
 
+/**
+ * HTMLでのプレビューペイン。
+ */
 class HtmlPreview extends JEditorPane {
   val processor = new PegDownProcessor
 
