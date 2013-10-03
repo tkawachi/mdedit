@@ -1,6 +1,5 @@
 package com.github.tkawachi.mdedit
 
-import java.awt.event.{KeyEvent, KeyListener}
 import javax.swing._
 
 /**
@@ -9,25 +8,15 @@ import javax.swing._
 class MainWindow extends JFrame("mdedit") {
   setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
 
-  val textArea = new JEditorPane()
-  val htmlView = new HtmlPreview
+  val previewPane = new HtmlPreview
+  val sourcePane = new SourcePane(previewPane)
 
   val splitPane = new JSplitPane()
-  splitPane.add(new JScrollPane(textArea), JSplitPane.LEFT)
-  splitPane.add(new JScrollPane(htmlView), JSplitPane.RIGHT)
+  splitPane.add(new JScrollPane(sourcePane), JSplitPane.LEFT)
+  splitPane.add(new JScrollPane(previewPane), JSplitPane.RIGHT)
   splitPane.setResizeWeight(0.5)
 
   getContentPane.add(splitPane)
-
-  textArea.addKeyListener(new KeyListener {
-    def keyTyped(e: KeyEvent) {}
-
-    def keyPressed(e: KeyEvent) {}
-
-    def keyReleased(e: KeyEvent) {
-      htmlView.setMarkdownSource(textArea.getText)
-    }
-  })
 }
 
 object MainWindow {
