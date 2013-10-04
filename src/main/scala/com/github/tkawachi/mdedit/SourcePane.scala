@@ -1,13 +1,16 @@
 package com.github.tkawachi.mdedit
 
-import java.awt.event.{KeyEvent, KeyListener}
-import javax.swing.JEditorPane
+import java.awt.event.{ActionEvent, KeyEvent, KeyListener}
 import javax.swing.undo.UndoManager
+import javax.swing.{KeyStroke, AbstractAction, JEditorPane}
 
 /**
  * Markdown のソースコードを書くペイン。
  */
 class SourcePane(preview: HtmlPreview) extends JEditorPane {
+
+  import java.awt.event.InputEvent._
+  import javax.swing.Action._
 
   /**
    * undo 管理オブジェクト。
@@ -15,21 +18,47 @@ class SourcePane(preview: HtmlPreview) extends JEditorPane {
   private[this] val undoManager = new UndoManager
   getDocument.addUndoableEditListener(undoManager)
 
+  private[this] val undoAction = new AbstractAction("元に戻す(U)") {
+    val defaultAccelKey =
+      if (Platform.isMac) KeyStroke.getKeyStroke(KeyEvent.VK_Z, META_DOWN_MASK)
+      else KeyStroke.getKeyStroke(KeyEvent.VK_Z, CTRL_DOWN_MASK)
+
+    putValue(MNEMONIC_KEY, 'U')
+    putValue(ACCELERATOR_KEY, defaultAccelKey)
+
+    override def isEnabled = undoManager.canUndo
+
+    def actionPerformed(e: ActionEvent) {
+      if (isEnabled) undoManager.undo()
+    }
+  }
+
+  private[this] val redoAction = new AbstractAction("やり直す(R)") {
+    val defaultAccelKey =
+      if (Platform.isMac) KeyStroke.getKeyStroke(KeyEvent.VK_Z, META_DOWN_MASK | SHIFT_DOWN_MASK)
+      else KeyStroke.getKeyStroke(KeyEvent.VK_Y, CTRL_DOWN_MASK)
+
+    putValue(MNEMONIC_KEY, 'R')
+    putValue(ACCELERATOR_KEY, defaultAccelKey)
+
+    override def isEnabled = undoManager.canRedo
+
+    def actionPerformed(e: ActionEvent) {
+      if (isEnabled) undoManager.redo()
+    }
+  }
+
+  Seq(undoAction, redoAction).foreach { (action) =>
+    getInputMap.put(action.getValue(ACCELERATOR_KEY).asInstanceOf[KeyStroke], action.getValue(NAME))
+    getActionMap.put(action.getValue(NAME), action)
+  }
+
   addKeyListener(new KeyListener {
 
-    import KeyEvent._
 
     def keyTyped(e: KeyEvent) {}
 
-    def keyPressed(e: KeyEvent) {
-      // Ctrl-z or Cmd-z で undo
-      // Shirt-Ctrl-z or Shift-Cmd-z で redo
-      (e.getKeyCode, e.isShiftDown, e.isControlDown || e.isMetaDown) match {
-        case (VK_Z, false, true) => if (undoManager.canUndo) undoManager.undo()
-        case (VK_Z, true, true) => if (undoManager.canRedo) undoManager.redo()
-        case _ =>
-      }
-    }
+    def keyPressed(e: KeyEvent) {}
 
     def keyReleased(e: KeyEvent) {
       preview.setMarkdownSource(getText)
