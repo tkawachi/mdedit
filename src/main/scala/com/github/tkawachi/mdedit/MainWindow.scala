@@ -2,6 +2,7 @@ package com.github.tkawachi.mdedit
 
 import com.github.tkawachi.mdedit.action.{OpenAction, SaveAction}
 import grizzled.slf4j.Logging
+import java.awt.FileDialog
 import java.io.{PrintWriter, File}
 import javax.swing._
 import scala.io.Source
@@ -42,22 +43,14 @@ class MainWindow extends JFrame("mdedit") with Logging {
   }
 
   def openFile() {
-    import JFileChooser._
-
-    val chooser = new JFileChooser()
-    chooser.showOpenDialog(this) match {
-      case APPROVE_OPTION =>
-        optFile = Option(chooser.getSelectedFile)
-        optFile.foreach { (file) =>
-          sourcePane.setMarkdownSource(Source.fromFile(file)("utf-8").mkString)
-        }
-      case _ =>
+    chooseFile().foreach { (file) =>
+      sourcePane.setMarkdownSource(Source.fromFile(file)("utf-8").mkString)
     }
   }
 
   def saveFile() {
     optFile.orElse {
-      optFile = chooseSaveFile()
+      optFile = chooseFile()
       optFile
     }.foreach { (file) =>
       val writer = new PrintWriter(file, "utf-8")
@@ -65,17 +58,12 @@ class MainWindow extends JFrame("mdedit") with Logging {
     }
   }
 
-  def chooseSaveFile(): Option[File] = {
-    import JFileChooser._
-
-    val fileChooser = new JFileChooser()
-    fileChooser.showSaveDialog(this) match {
-      case APPROVE_OPTION => Option(fileChooser.getSelectedFile)
-      case ERROR_OPTION =>
-        error("An error occurred during save")
-        None
-      case _ => None
-    }
+  def chooseFile(): Option[File] = {
+    val dialog = new FileDialog(this)
+    dialog.setVisible(true)
+    val files = dialog.getFiles
+    if (files.size > 0) Option(files(0))
+    else None
   }
 }
 
