@@ -44,6 +44,7 @@ class MainWindow extends JFrame("mdedit") with Logging {
 
   def openFile() {
     chooseFile().foreach { (file) =>
+      optFile = Option(file)
       sourcePane.setMarkdownSource(Source.fromFile(file)("utf-8").mkString)
     }
   }
