@@ -10,6 +10,7 @@ import scala.io.Source
  * メインウィンドウ。
  */
 class MainWindow extends JFrame("mdedit") with Logging {
+  System.setProperty("com.apple.mrj.application.apple.menu.about.name", "mdedit")
   setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
 
   var optFile: Option[File] = None
@@ -80,6 +81,11 @@ class MainWindow extends JFrame("mdedit") with Logging {
 
 object MainWindow {
   def main(args: Array[String]) {
+    // メニューの一番左を設定できるはずだが、効かないようだ。
+    // sys.props("com.apple.mrj.application.apple.menu.about.name") = "mdedit"
+    sys.props("apple.laf.useScreenMenuBar") = "true"
+    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
+
     val win = new MainWindow()
     win.setSize(500, 400)
     win.setVisible(true)
