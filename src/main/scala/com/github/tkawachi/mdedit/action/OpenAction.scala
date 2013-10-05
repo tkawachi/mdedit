@@ -11,7 +11,6 @@ class OpenAction(mainWindow: MainWindow) extends AbstractAction("開く") with L
   val defaultAccelKey =
     KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask)
 
-  putValue(MNEMONIC_KEY, 'O'.toInt)
   putValue(ACCELERATOR_KEY, defaultAccelKey)
 
   def actionPerformed(e: ActionEvent) {

@@ -11,7 +11,6 @@ class SaveAction(mainWindow: MainWindow) extends AbstractAction("保存") with L
   val defaultAccelKey =
     KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask)
 
-  putValue(MNEMONIC_KEY, 'S'.toInt)
   putValue(ACCELERATOR_KEY, defaultAccelKey)
 
 

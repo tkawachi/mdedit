@@ -10,7 +10,6 @@ class UndoAction(undoManager: UndoManager) extends AbstractAction("元に戻す"
   val defaultAccelKey =
     KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask)
 
-  putValue(MNEMONIC_KEY, 'U'.toInt)
   putValue(ACCELERATOR_KEY, defaultAccelKey)
 
   def actionPerformed(e: ActionEvent) {

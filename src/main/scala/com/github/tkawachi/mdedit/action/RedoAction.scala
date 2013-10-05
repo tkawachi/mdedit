@@ -11,7 +11,6 @@ class RedoAction(undoManager: UndoManager) extends AbstractAction("やり直す"
   val defaultAccelKey =
     KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask | SHIFT_DOWN_MASK)
 
-  putValue(MNEMONIC_KEY, 'R'.toInt)
   putValue(ACCELERATOR_KEY, defaultAccelKey)
 
   def actionPerformed(e: ActionEvent) {
