@@ -34,6 +34,9 @@ class MainWindow extends JFrame("mdedit") with Logging {
     val fileMenu = menuBar.add(new JMenu("File"))
     fileMenu.add(new JMenuItem(saveAction))
     fileMenu.add(new JMenuItem(openAction))
+    val editMenu = menuBar.add(new JMenu("Edit"))
+    editMenu.add(new JMenuItem(sourcePane.undoAction))
+    editMenu.add(new JMenuItem(sourcePane.redoAction))
     menuBar
   }
 

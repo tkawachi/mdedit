@@ -1,15 +1,15 @@
 package com.github.tkawachi.mdedit
 
-import java.awt.event.{ActionEvent, KeyEvent, KeyListener}
+import com.github.tkawachi.mdedit.action.{RedoAction, UndoAction}
+import java.awt.event.{KeyEvent, KeyListener}
 import javax.swing.undo.UndoManager
-import javax.swing.{KeyStroke, AbstractAction, JEditorPane}
+import javax.swing.{KeyStroke, JEditorPane}
 
 /**
  * Markdown のソースコードを書くペイン。
  */
 class SourcePane(preview: HtmlPreview) extends JEditorPane {
 
-  import java.awt.event.InputEvent._
   import javax.swing.Action._
 
   /**
@@ -18,35 +18,9 @@ class SourcePane(preview: HtmlPreview) extends JEditorPane {
   private[this] val undoManager = new UndoManager
   getDocument.addUndoableEditListener(undoManager)
 
-  private[this] val undoAction = new AbstractAction("元に戻す(U)") {
-    val defaultAccelKey =
-      if (Platform.isMac) KeyStroke.getKeyStroke(KeyEvent.VK_Z, META_DOWN_MASK)
-      else KeyStroke.getKeyStroke(KeyEvent.VK_Z, CTRL_DOWN_MASK)
+  val undoAction = new UndoAction(undoManager)
 
-    putValue(MNEMONIC_KEY, 'U')
-    putValue(ACCELERATOR_KEY, defaultAccelKey)
-
-    override def isEnabled = undoManager.canUndo
-
-    def actionPerformed(e: ActionEvent) {
-      if (isEnabled) undoManager.undo()
-    }
-  }
-
-  private[this] val redoAction = new AbstractAction("やり直す(R)") {
-    val defaultAccelKey =
-      if (Platform.isMac) KeyStroke.getKeyStroke(KeyEvent.VK_Z, META_DOWN_MASK | SHIFT_DOWN_MASK)
-      else KeyStroke.getKeyStroke(KeyEvent.VK_Y, CTRL_DOWN_MASK)
-
-    putValue(MNEMONIC_KEY, 'R')
-    putValue(ACCELERATOR_KEY, defaultAccelKey)
-
-    override def isEnabled = undoManager.canRedo
-
-    def actionPerformed(e: ActionEvent) {
-      if (isEnabled) undoManager.redo()
-    }
-  }
+  val redoAction = new RedoAction(undoManager)
 
   Seq(undoAction, redoAction).foreach { (action) =>
     getInputMap.put(action.getValue(ACCELERATOR_KEY).asInstanceOf[KeyStroke], action.getValue(NAME))
