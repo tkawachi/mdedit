@@ -61,8 +61,17 @@ class SourcePane(preview: HtmlPreview) extends JEditorPane {
     def keyPressed(e: KeyEvent) {}
 
     def keyReleased(e: KeyEvent) {
-      preview.setMarkdownSource(getText)
+      updatePreview()
     }
   })
+
+  def setMarkdownSource(txt: String) {
+    setText(txt)
+    updatePreview()
+  }
+
+  def updatePreview() {
+    preview.setMarkdownSource(getText)
+  }
 
 }

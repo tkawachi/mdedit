@@ -1,3 +1,7 @@
 scalaVersion := "2.10.3"
 
-libraryDependencies += "org.pegdown" % "pegdown" % "1.4.1"
+libraryDependencies ++= Seq(
+  "org.pegdown" % "pegdown" % "1.4.1",
+  "org.clapper" %% "grizzled-slf4j" % "1.0.1",
+  "ch.qos.logback" % "logback-classic" % "1.0.6"
+)
