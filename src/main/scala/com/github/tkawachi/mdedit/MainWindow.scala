@@ -41,7 +41,7 @@ class MainWindow extends JFrame("mdedit") with Logging {
     import JFileChooser._
 
     val chooser = new JFileChooser()
-    chooser.showOpenDialog(null) match {
+    chooser.showOpenDialog(this) match {
       case APPROVE_OPTION =>
         optFile = Option(chooser.getSelectedFile)
         optFile.foreach { (file) =>
@@ -65,7 +65,7 @@ class MainWindow extends JFrame("mdedit") with Logging {
     import JFileChooser._
 
     val fileChooser = new JFileChooser()
-    fileChooser.showSaveDialog(null) match {
+    fileChooser.showSaveDialog(this) match {
       case APPROVE_OPTION => Option(fileChooser.getSelectedFile)
       case ERROR_OPTION =>
         error("An error occurred during save")
