@@ -3,6 +3,9 @@ package com.github.tkawachi.mdedit
 import java.awt.{Frame, FileDialog}
 import java.io.File
 
+/**
+ * ファイルを選択するダイアログを表示する関数たち。
+ */
 object FileChooser {
   /**
    * 開くファイルを選択する。
