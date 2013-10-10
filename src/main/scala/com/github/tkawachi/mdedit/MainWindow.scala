@@ -2,7 +2,6 @@ package com.github.tkawachi.mdedit
 
 import com.github.tkawachi.mdedit.action.{SaveAsAction, OpenAction, SaveAction}
 import grizzled.slf4j.Logging
-import java.awt.FileDialog
 import java.io.{PrintWriter, File}
 import javax.swing._
 import scala.io.Source
@@ -34,13 +33,17 @@ class MainWindow extends JFrame("mdedit") with Logging {
 
   def createMenuBar: JMenuBar = {
     val menuBar = new JMenuBar
+
     val fileMenu = menuBar.add(new JMenu("File"))
-    Seq(openAction, saveAction, saveAsAction).foreach { (action) =>
+    for (action <- Seq(openAction, saveAction, saveAsAction)) {
       fileMenu.add(new JMenuItem(action))
     }
+
     val editMenu = menuBar.add(new JMenu("Edit"))
-    editMenu.add(new JMenuItem(sourcePane.undoAction))
-    editMenu.add(new JMenuItem(sourcePane.redoAction))
+    for (action <- Seq(sourcePane.undoAction, sourcePane.redoAction)) {
+      editMenu.add(new JMenuItem(action))
+    }
+
     menuBar
   }
 
@@ -48,7 +51,7 @@ class MainWindow extends JFrame("mdedit") with Logging {
    * ファイルを開く
    */
   def openFile() {
-    chooseFile(false).foreach { (file) =>
+    for (file <- FileChooser.chooseOpen(this)) {
       optFile = Option(file)
       sourcePane.setMarkdownSource(Source.fromFile(file)("utf-8").mkString)
     }
@@ -59,7 +62,7 @@ class MainWindow extends JFrame("mdedit") with Logging {
    */
   def saveFile() {
     optFile.orElse {
-      optFile = chooseFile(true)
+      optFile = FileChooser.chooseSave(this)
       optFile
     }.foreach(writeToFile)
   }
@@ -78,24 +81,10 @@ class MainWindow extends JFrame("mdedit") with Logging {
    */
   def saveAsFile() {
     info("saveAsFile()")
-    for (file <- chooseFile(true)) {
+    for (file <- FileChooser.chooseSave(this)) {
       optFile = Option(file)
       writeToFile(file)
     }
-  }
-
-  /**
-   * ファイルを選択する。
-   * @return
-   */
-  def chooseFile(forSave: Boolean): Option[File] = {
-    val dialog =
-      if (forSave) new FileDialog(this, "保存するファイルを選択", FileDialog.SAVE)
-      else new FileDialog(this, "開くファイルを選択", FileDialog.LOAD)
-    dialog.setVisible(true)
-    val files = dialog.getFiles
-    if (files.size > 0) Option(files(0))
-    else None
   }
 }
 
