@@ -70,10 +70,10 @@ class MainWindow extends Frame with Logging {
    * 保存
    */
   def saveFile(): Option[File] = {
-    optFile.orElse {
-      optFile = FileChooser.chooseSave(this.peer)
-      optFile
-    }.foreach(writeToFile)
+    optFile match {
+      case Some(file) => writeToFile(file)
+      case None => saveAsFile()
+    }
     optFile
   }
 
@@ -89,11 +89,12 @@ class MainWindow extends Frame with Logging {
   /**
    * 別名で保存
    */
-  def saveAsFile() {
+  def saveAsFile(): Option[File] = {
     info("saveAsFile()")
-    for (file <- FileChooser.chooseSave(this.peer)) {
+    for (file <- FileChooser.chooseSave(this.peer)) yield {
       optFile = Option(file)
       writeToFile(file)
+      file
     }
   }
 }
