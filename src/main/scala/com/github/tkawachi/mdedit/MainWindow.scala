@@ -11,10 +11,10 @@ import scala.swing._
 /**
  * メインウィンドウ。
  */
-class MainWindow extends MainFrame with Logging {
+class MainWindow extends Frame with Logging {
   System.setProperty("com.apple.mrj.application.apple.menu.about.name", "mdedit")
 
-  //  peer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+  peer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
 
   var optFile: Option[File] = None
 
