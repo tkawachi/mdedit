@@ -5,61 +5,63 @@ import grizzled.slf4j.Logging
 import java.io.{PrintWriter, File}
 import javax.swing._
 import scala.io.Source
+import scala.swing.Dialog.{Result, Options}
+import scala.swing._
 
 /**
  * メインウィンドウ。
  */
-class MainWindow extends JFrame("mdedit") with Logging {
+class MainWindow extends MainFrame with Logging {
   System.setProperty("com.apple.mrj.application.apple.menu.about.name", "mdedit")
-  setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+
+  //  peer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
 
   var optFile: Option[File] = None
 
   val previewPane = new HtmlPreview
   val sourcePane = new SourcePane(previewPane)
 
-  val splitPane = new JSplitPane()
-  splitPane.add(new JScrollPane(sourcePane), JSplitPane.LEFT)
-  splitPane.add(new JScrollPane(previewPane), JSplitPane.RIGHT)
-  splitPane.setResizeWeight(0.5)
+  val splitPane = new SplitPane(Orientation.Vertical)
+  splitPane.leftComponent = new ScrollPane(sourcePane)
+  splitPane.rightComponent = new ScrollPane(previewPane)
+  splitPane.resizeWeight = 0.5
 
-  getContentPane.add(splitPane)
+  contents = splitPane
 
   val openAction = new OpenAction(this)
   val saveAction = new SaveAction(this)
   val saveAsAction = new SaveAsAction(this)
 
-  setJMenuBar(createMenuBar)
+  menuBar = createMenuBar
 
-  def createMenuBar: JMenuBar = {
-    val menuBar = new JMenuBar
+  def createMenuBar: MenuBar =
+    new MenuBar {
+      contents += new Menu("File") {
+        for (action <- Seq(openAction, saveAction, saveAsAction)) {
+          contents += new MenuItem(action)
+        }
+      }
 
-    val fileMenu = menuBar.add(new JMenu("File"))
-    for (action <- Seq(openAction, saveAction, saveAsAction)) {
-      fileMenu.add(new JMenuItem(action))
+      contents += new Menu("Edit") {
+        for (action <- Seq(sourcePane.undoAction, sourcePane.redoAction)) {
+          contents += new MenuItem(action)
+        }
+      }
     }
-
-    val editMenu = menuBar.add(new JMenu("Edit"))
-    for (action <- Seq(sourcePane.undoAction, sourcePane.redoAction)) {
-      editMenu.add(new JMenuItem(action))
-    }
-
-    menuBar
-  }
 
   /**
    * ファイルを開く
    */
   def openFile() {
     if (sourcePane.isDirty) {
-      JOptionPane.showConfirmDialog(this, "ファイルが変更されています。保存しますか？") match {
-        case JOptionPane.YES_OPTION => saveFile() orElse (return)
-        case JOptionPane.NO_OPTION =>
+      Dialog.showConfirmation(message = "ファイルが変更されています。保存しますか？", optionType = Options.YesNoCancel) match {
+        case Result.Yes => saveFile() orElse (return)
+        case Result.No =>
         case _ => return
       }
     }
 
-    for (file <- FileChooser.chooseOpen(this)) {
+    for (file <- FileChooser.chooseOpen(this.peer)) {
       optFile = Option(file)
       sourcePane.setTextFromFile(Source.fromFile(file)("utf-8").mkString)
     }
@@ -70,7 +72,7 @@ class MainWindow extends JFrame("mdedit") with Logging {
    */
   def saveFile(): Option[File] = {
     optFile.orElse {
-      optFile = FileChooser.chooseSave(this)
+      optFile = FileChooser.chooseSave(this.peer)
       optFile
     }.foreach(writeToFile)
     optFile
@@ -82,7 +84,7 @@ class MainWindow extends JFrame("mdedit") with Logging {
    */
   private[this] def writeToFile(file: File) {
     val writer = new PrintWriter(file, "utf-8")
-    try writer.write(sourcePane.getText) finally writer.close()
+    try writer.write(sourcePane.peer.getText) finally writer.close()
   }
 
   /**
@@ -90,7 +92,7 @@ class MainWindow extends JFrame("mdedit") with Logging {
    */
   def saveAsFile() {
     info("saveAsFile()")
-    for (file <- FileChooser.chooseSave(this)) {
+    for (file <- FileChooser.chooseSave(this.peer)) {
       optFile = Option(file)
       writeToFile(file)
     }
@@ -105,7 +107,7 @@ object MainWindow {
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
 
     val win = new MainWindow()
-    win.setSize(500, 400)
-    win.setVisible(true)
+    win.size = new Dimension(500, 400)
+    win.visible = true
   }
 }

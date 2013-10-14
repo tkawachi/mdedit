@@ -1,20 +1,20 @@
 package com.github.tkawachi.mdedit
 
-import javax.swing.JEditorPane
 import org.pegdown.PegDownProcessor
+import scala.swing.EditorPane
 
 /**
  * HTMLでのプレビューペイン。
  */
-class HtmlPreview extends JEditorPane {
+class HtmlPreview extends EditorPane {
   val processor = new PegDownProcessor
 
-  setContentType("text/html")
-  setEditable(false)
-  setText("ここにはHTMLが表示されます。")
+  contentType = "text/html"
+  peer.setEditable(false)
+  peer.setText("ここにはHTMLが表示されます。")
 
   def setMarkdownSource(src: String) {
     val html = processor.markdownToHtml(src)
-    setText(html)
+    peer.setText(html)
   }
 }

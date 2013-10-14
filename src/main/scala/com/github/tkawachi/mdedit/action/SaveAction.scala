@@ -3,18 +3,14 @@ package com.github.tkawachi.mdedit.action
 import com.github.tkawachi.mdedit.MainWindow
 import grizzled.slf4j.Logging
 import java.awt.Toolkit
-import java.awt.event.{KeyEvent, ActionEvent}
-import javax.swing.Action._
-import javax.swing.{KeyStroke, AbstractAction}
+import java.awt.event.KeyEvent
+import javax.swing.KeyStroke
+import scala.swing.Action
 
-class SaveAction(mainWindow: MainWindow) extends AbstractAction("保存") with Logging {
-  val defaultAccelKey =
+class SaveAction(mainWindow: MainWindow) extends Action("保存") with Logging {
+  accelerator = Option(
     KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask)
+  )
 
-  putValue(ACCELERATOR_KEY, defaultAccelKey)
-
-
-  def actionPerformed(e: ActionEvent) {
-    mainWindow.saveFile()
-  }
+  def apply() = mainWindow.saveFile()
 }

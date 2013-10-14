@@ -4,20 +4,19 @@ import com.github.tkawachi.mdedit.action.{RedoAction, UndoAction}
 import grizzled.slf4j.Logging
 import javax.swing.event.{DocumentEvent, DocumentListener}
 import javax.swing.undo.UndoManager
-import javax.swing.{KeyStroke, JEditorPane}
+import scala.swing.EditorPane
 
 /**
  * Markdown のソースコードを書くペイン。
  */
-class SourcePane(preview: HtmlPreview) extends JEditorPane with Logging {
+class SourcePane(preview: HtmlPreview) extends EditorPane with Logging {
 
-  import javax.swing.Action._
 
   /**
    * undo 管理オブジェクト。
    */
   private[this] val undoManager = new UndoManager
-  getDocument.addUndoableEditListener(undoManager)
+  peer.getDocument.addUndoableEditListener(undoManager)
 
   val undoAction = new UndoAction(undoManager)
 
@@ -26,11 +25,11 @@ class SourcePane(preview: HtmlPreview) extends JEditorPane with Logging {
   private var _isDirty = false
 
   Seq(undoAction, redoAction).foreach { (action) =>
-    getInputMap.put(action.getValue(ACCELERATOR_KEY).asInstanceOf[KeyStroke], action.getValue(NAME))
-    getActionMap.put(action.getValue(NAME), action)
+    action.accelerator.foreach((acc) => peer.getInputMap.put(acc, action.title))
+    peer.getActionMap.put(action.title, action.peer)
   }
 
-  getDocument.addDocumentListener(new DocumentListener {
+  peer.getDocument.addDocumentListener(new DocumentListener {
     def insertUpdate(e: DocumentEvent) {
       _isDirty = true
       updatePreview()
@@ -53,12 +52,12 @@ class SourcePane(preview: HtmlPreview) extends JEditorPane with Logging {
    * @param txt テキスト
    */
   def setTextFromFile(txt: String) {
-    setText(txt)
+    peer.setText(txt)
     _isDirty = false
   }
 
   def updatePreview() {
-    preview.setMarkdownSource(getText)
+    preview.setMarkdownSource(peer.getText)
   }
 
 }
