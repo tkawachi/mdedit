@@ -1,5 +1,7 @@
 package com.github.tkawachi.mdedit
 
+import com.apple.eawt.AppEvent.QuitEvent
+import com.apple.eawt.{QuitResponse, QuitHandler, Application}
 import com.github.tkawachi.mdedit.action.{SaveAsAction, OpenAction, SaveAction}
 import grizzled.slf4j.Logging
 import java.io.{PrintWriter, File}
@@ -48,21 +50,40 @@ class MainWindow extends Frame with Logging {
       }
     }
 
+  if (Platform.isMac) {
+    Application.getApplication.setQuitHandler(new QuitHandler {
+      def handleQuitRequestWith(ev: QuitEvent, resp: QuitResponse) {
+        if (sourcePane.isDirty) {
+          if (saveDirtyBuffer()) resp.cancelQuit()
+          else resp.performQuit()
+        } else resp.performQuit()
+      }
+    })
+  }
+
   /**
    * ファイルを開く
    */
   def openFile() {
     if (sourcePane.isDirty) {
-      Dialog.showConfirmation(message = "ファイルが変更されています。保存しますか？", optionType = Options.YesNoCancel) match {
-        case Result.Yes => saveFile() orElse (return)
-        case Result.No =>
-        case _ => return
-      }
+      if (saveDirtyBuffer()) return
     }
 
     for (file <- FileChooser.chooseOpen(this.peer)) {
       optFile = Option(file)
       sourcePane.setTextFromFile(Source.fromFile(file)("utf-8").mkString)
+    }
+  }
+
+  /**
+   * 未保存のファイルを保存する。
+   * @return cancel したか？
+   */
+  def saveDirtyBuffer(): Boolean = {
+    Dialog.showConfirmation(message = "ファイルが変更されています。保存しますか？", optionType = Options.YesNoCancel) match {
+      case Result.Yes => saveFile().isEmpty
+      case Result.No => false
+      case _ => true
     }
   }
 
