@@ -51,20 +51,29 @@ class MainWindow extends JFrame("mdedit") with Logging {
    * ファイルを開く
    */
   def openFile() {
+    if (sourcePane.isDirty) {
+      JOptionPane.showConfirmDialog(this, "ファイルが変更されています。保存しますか？") match {
+        case JOptionPane.YES_OPTION => saveFile() orElse (return)
+        case JOptionPane.NO_OPTION =>
+        case _ => return
+      }
+    }
+
     for (file <- FileChooser.chooseOpen(this)) {
       optFile = Option(file)
-      sourcePane.setMarkdownSource(Source.fromFile(file)("utf-8").mkString)
+      sourcePane.setTextFromFile(Source.fromFile(file)("utf-8").mkString)
     }
   }
 
   /**
    * 保存
    */
-  def saveFile() {
+  def saveFile(): Option[File] = {
     optFile.orElse {
       optFile = FileChooser.chooseSave(this)
       optFile
     }.foreach(writeToFile)
+    optFile
   }
 
   /**

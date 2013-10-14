@@ -1,14 +1,15 @@
 package com.github.tkawachi.mdedit
 
 import com.github.tkawachi.mdedit.action.{RedoAction, UndoAction}
-import java.awt.event.{KeyEvent, KeyListener}
+import grizzled.slf4j.Logging
+import javax.swing.event.{DocumentEvent, DocumentListener}
 import javax.swing.undo.UndoManager
 import javax.swing.{KeyStroke, JEditorPane}
 
 /**
  * Markdown のソースコードを書くペイン。
  */
-class SourcePane(preview: HtmlPreview) extends JEditorPane {
+class SourcePane(preview: HtmlPreview) extends JEditorPane with Logging {
 
   import javax.swing.Action._
 
@@ -22,26 +23,38 @@ class SourcePane(preview: HtmlPreview) extends JEditorPane {
 
   val redoAction = new RedoAction(undoManager)
 
+  private var _isDirty = false
+
   Seq(undoAction, redoAction).foreach { (action) =>
     getInputMap.put(action.getValue(ACCELERATOR_KEY).asInstanceOf[KeyStroke], action.getValue(NAME))
     getActionMap.put(action.getValue(NAME), action)
   }
 
-  addKeyListener(new KeyListener {
+  getDocument.addDocumentListener(new DocumentListener {
+    def insertUpdate(e: DocumentEvent) {
+      _isDirty = true
+      updatePreview()
+    }
 
+    def changedUpdate(e: DocumentEvent) {
+      _isDirty = true
+    }
 
-    def keyTyped(e: KeyEvent) {}
-
-    def keyPressed(e: KeyEvent) {}
-
-    def keyReleased(e: KeyEvent) {
+    def removeUpdate(e: DocumentEvent) {
+      _isDirty = true
       updatePreview()
     }
   })
 
-  def setMarkdownSource(txt: String) {
+  def isDirty: Boolean = _isDirty
+
+  /**
+   * ファイルから読み込んだテキストを設定する。
+   * @param txt テキスト
+   */
+  def setTextFromFile(txt: String) {
     setText(txt)
-    updatePreview()
+    _isDirty = false
   }
 
   def updatePreview() {
