@@ -12,6 +12,7 @@ import scala.swing._
  * メインウィンドウ。
  */
 class MainWindow extends Frame with Logging {
+  title = "mdedit"
   System.setProperty("com.apple.mrj.application.apple.menu.about.name", "mdedit")
 
   peer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
@@ -32,9 +33,7 @@ class MainWindow extends Frame with Logging {
   val saveAction = new SaveAction(this)
   val saveAsAction = new SaveAsAction(this)
 
-  menuBar = createMenuBar
-
-  def createMenuBar: MenuBar =
+  menuBar =
     new MenuBar {
       contents += new Menu("File") {
         for (action <- Seq(openAction, saveAction, saveAsAction)) {
