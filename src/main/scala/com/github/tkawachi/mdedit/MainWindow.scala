@@ -19,7 +19,14 @@ class MainWindow extends Frame with Logging {
 
   peer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
 
-  var optFile: Option[File] = None
+  private[this] var _optFile: Option[File] = None
+
+  def openedFile: Option[File] = _optFile
+
+  def openedFile_=(file: File) {
+    title = file.getName
+    _optFile = Option(file)
+  }
 
   val previewPane = new HtmlPreview
   val sourcePane = new SourcePane(previewPane)
@@ -70,7 +77,7 @@ class MainWindow extends Frame with Logging {
     }
 
     for (file <- FileChooser.chooseOpen(this.peer)) {
-      optFile = Option(file)
+      openedFile = file
       sourcePane.setTextFromFile(Source.fromFile(file)("utf-8").mkString)
     }
   }
@@ -91,11 +98,11 @@ class MainWindow extends Frame with Logging {
    * 保存
    */
   def saveFile(): Option[File] = {
-    optFile match {
+    openedFile match {
       case Some(file) => writeToFile(file)
       case None => saveAsFile()
     }
-    optFile
+    openedFile
   }
 
   /**
@@ -113,7 +120,7 @@ class MainWindow extends Frame with Logging {
   def saveAsFile(): Option[File] = {
     info("saveAsFile()")
     for (file <- FileChooser.chooseSave(this.peer)) yield {
-      optFile = Option(file)
+      openedFile = file
       writeToFile(file)
       file
     }
